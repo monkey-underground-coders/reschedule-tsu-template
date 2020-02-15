@@ -43,7 +43,11 @@ const App = props => {
   }
 
   const onDelete = externalId => () => {
-    alert(externalId)
+    fetch(`${baseUrl}/cells/c/${externalId}`, { method: 'DELETE', headers: generateHeaders(props.token) }).then(res => {
+      if (res.ok) {
+        setData({ ...data, content: data.content.filter(c => c.externalId !== externalId) })
+      }
+    })
   }
 
   const logout = () => {
