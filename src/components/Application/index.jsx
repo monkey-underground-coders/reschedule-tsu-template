@@ -46,6 +46,11 @@ const App = props => {
     alert(externalId)
   }
 
+  const logout = () => {
+    localStorage.clear()
+    window.location.reload()
+  }
+
   React.useEffect(() => {
     setLoading(true)
     fetch(`${baseUrl}/cells/u/${props.username}/cells?size=150&page=${currentPage}`, {
@@ -94,6 +99,7 @@ const App = props => {
           <td>{DAY_OF_WEEK[item.dayOfWeek]}</td>
           <td>{item.columnPosition}</td>
           <td>{WEEKSIGN[item.weekSign]}</td>
+          <td>{item.group}</td>
           <td>{item.subgroup}</td>
           <td>{item.fullSubjectName}</td>
           <td>{item.crossPair ? 'Да' : 'Нет'}</td>
@@ -122,6 +128,7 @@ const App = props => {
                     <th>День недели</th>
                     <th>Позиция</th>
                     <th>Неделя(+\-)</th>
+                    <th>Группа</th>
                     <th>Подгруппа</th>
                     <th>Предмет</th>
                     <th>Кросспара</th>
@@ -163,6 +170,10 @@ const App = props => {
                     />
                   </PaginationItem>
                 </Pagination>
+
+                <button className="btn btn-danger" onClick={logout}>
+                  Выход
+                </button>
               </div>
             </div>
           </>
