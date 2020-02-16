@@ -35,6 +35,7 @@ const CreateItemModal = props => {
       label: 'Позиция пары',
       name: 'columnPosition',
       isArray: true,
+      value: 0,
       values: [1, 2, 3, 4, 5, 6, 7]
     },
 

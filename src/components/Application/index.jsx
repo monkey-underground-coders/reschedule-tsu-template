@@ -101,7 +101,7 @@ const App = props => {
       data.content.map(item => (
         <tr key={item.externalId}>
           <td>{DAY_OF_WEEK[item.dayOfWeek]}</td>
-          <td>{item.columnPosition}</td>
+          <td>{item.columnPosition + 1}</td>
           <td>{WEEKSIGN[item.weekSign]}</td>
           <td>{item.group}</td>
           <td>{item.subgroup}</td>
