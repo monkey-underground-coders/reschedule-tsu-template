@@ -167,8 +167,8 @@ const CreateItemModal = props => {
       shortSubjectName: normalizedPayload.fullSubjectName,
       crossPair: !!parseInt(normalizedPayload.crossPair),
       course: parseInt(normalizedPayload.course) + 1,
-      ignoreExternalDb: true,
-      ignoreLastExternalDbRecord: true
+      // ignoreExternalDb: true,
+      // ignoreLastExternalDbRecord: true
     })
   }
 
