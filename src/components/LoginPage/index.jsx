@@ -1,39 +1,42 @@
-import React from 'react'
+import React, { useCallback, useState } from 'react'
 import { baseUrl, generatebase64 } from '../../utils'
 
 export default () => {
-  const [username, setUsername] = React.useState('')
-  const [password, setPassword] = React.useState('')
-  const [fetching, setFetching] = React.useState(false)
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [fetching, setFetching] = useState(false)
 
-  function cleanupPayload() {
+  const cleanupPayload = useCallback(() => {
     setUsername(username.trim())
     setPassword(password.trim())
-  }
+  }, [username, password, setUsername, setPassword])
 
-  function handleSubmit(event) {
-    event.preventDefault()
+  const handleSubmit = useCallback(
+    (event) => {
+      event.preventDefault()
 
-    cleanupPayload()
-    if (username && password && !fetching) {
-      setFetching(true)
-      const token = generatebase64([username, password].join(':'))
-      const headers = {
-        Authorization: `Basic ${token}`,
-        'X-Requested-With': 'XMLHttpRequest'
-      }
-      fetch(`${baseUrl}/user/cookies`, { headers }).then(res => {
-        if (res.ok) {
-          localStorage.setItem('token', JSON.stringify(token))
-          localStorage.setItem('username', JSON.stringify(username))
-          window.location.replace(window.location.href)
-        } else {
-          alert('invalid data')
+      cleanupPayload()
+      if (username && password && !fetching) {
+        setFetching(true)
+        const token = generatebase64([username, password].join(':'))
+        const headers = {
+          Authorization: `Basic ${token}`,
+          'X-Requested-With': 'XMLHttpRequest',
         }
-        setFetching(false)
-      })
-    }
-  }
+        fetch(`${baseUrl}/user/cookies`, { headers }).then((res) => {
+          if (res.ok) {
+            localStorage.setItem('token', JSON.stringify(token))
+            localStorage.setItem('username', JSON.stringify(username))
+            window.location.replace(window.location.href)
+          } else {
+            alert('invalid data')
+          }
+          setFetching(false)
+        })
+      }
+    },
+    [username, password, fetching, cleanupPayload]
+  )
 
   return (
     <div className="form container my-5">
@@ -44,7 +47,7 @@ export default () => {
             type="text"
             name="username"
             value={username}
-            onChange={e => setUsername(e.target.value)}
+            onChange={(e) => setUsername(e.target.value)}
             className="form-control"
           />
         </div>
@@ -55,7 +58,7 @@ export default () => {
             className="form-control"
             name="password"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </div>
         <div className="form-group">

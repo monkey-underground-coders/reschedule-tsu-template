@@ -1,16 +1,16 @@
-import React, { useState } from 'react'
+import React, { useCallback } from 'react'
 import TextInput from 'react-autocomplete-input'
 import 'react-autocomplete-input/dist/bundle.css'
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap'
 import { DAY_OF_WEEK, WEEKSIGN, PAIRS, LEVELS, FACULTIES } from '../../utils/constants'
-import _ from 'lodash'
+import { toast } from 'react-toastify'
 
 const initialPairRange = (() => {
   const pairsRange = PAIRS[0].split('-')
   return { start: pairsRange[0], end: pairsRange[1] }
 })()
 
-const CreateItemModal = props => {
+const CreateItemModal = (props) => {
   const { isOpen, toggle } = props
 
   const [data, setData] = React.useState([
@@ -19,7 +19,7 @@ const CreateItemModal = props => {
       hasAutocomplete: true,
       label: 'Название предмета',
       name: 'fullSubjectName',
-      value: ''
+      value: '',
     },
 
     // Auditory address
@@ -27,7 +27,7 @@ const CreateItemModal = props => {
       hasAutocomplete: true,
       label: 'Адрес аудитории',
       name: 'auditoryAddress',
-      value: ''
+      value: '',
     },
 
     // Column position
@@ -36,7 +36,7 @@ const CreateItemModal = props => {
       name: 'columnPosition',
       isArray: true,
       value: 0,
-      values: [1, 2, 3, 4, 5, 6, 7]
+      values: [1, 2, 3, 4, 5, 6, 7],
     },
 
     // Subgroup count
@@ -44,7 +44,7 @@ const CreateItemModal = props => {
       label: 'Количество подгрупп',
       name: 'countOfSubgroups',
       value: 2,
-      disabled: true
+      disabled: true,
     },
 
     // Cross pair
@@ -53,7 +53,7 @@ const CreateItemModal = props => {
       name: 'crossPair',
       value: 0,
       isArray: true,
-      values: ['Нет', 'Да']
+      values: ['Нет', 'Да'],
     },
 
     // Day of week
@@ -62,7 +62,7 @@ const CreateItemModal = props => {
       isObject: true,
       name: 'dayOfWeek',
       value: Object.keys(DAY_OF_WEEK)[0],
-      values: DAY_OF_WEEK
+      values: DAY_OF_WEEK,
     },
 
     // Start
@@ -70,7 +70,7 @@ const CreateItemModal = props => {
       label: 'Время начала',
       name: 'start',
       value: initialPairRange.start,
-      isDate: true
+      isDate: true,
     },
 
     // End date
@@ -78,7 +78,7 @@ const CreateItemModal = props => {
       label: 'Время окончания',
       name: 'end',
       value: initialPairRange.end,
-      isDate: true
+      isDate: true,
     },
 
     // Level
@@ -87,7 +87,7 @@ const CreateItemModal = props => {
       name: 'level',
       isObject: true,
       value: Object.keys(LEVELS)[0],
-      values: LEVELS
+      values: LEVELS,
     },
 
     // Faculty
@@ -96,7 +96,7 @@ const CreateItemModal = props => {
       name: 'faculty',
       values: FACULTIES,
       value: Object.keys(FACULTIES)[0],
-      isObject: true
+      isObject: true,
     },
 
     // Course level
@@ -105,7 +105,7 @@ const CreateItemModal = props => {
       name: 'course',
       value: 0,
       isArray: true,
-      values: [1, 2, 3, 4, 5]
+      values: [1, 2, 3, 4, 5],
     },
 
     // Faculty group
@@ -113,7 +113,7 @@ const CreateItemModal = props => {
       hasAutocomplete: true,
       label: 'Группа',
       name: 'group',
-      value: ''
+      value: '',
     },
 
     // Subgroup
@@ -122,7 +122,7 @@ const CreateItemModal = props => {
       name: 'subgroup',
       isArray: true,
       value: 0,
-      values: ['Обе подгруппы', 'Первая подгруппа', 'Вторая подгруппа']
+      values: ['Обе подгруппы', 'Первая подгруппа', 'Вторая подгруппа'],
     },
 
     // Teacher name
@@ -130,7 +130,7 @@ const CreateItemModal = props => {
       hasAutocomplete: true,
       label: 'Имя преподавателя',
       name: 'teacherName',
-      value: ''
+      value: '',
     },
 
     // Teacher Title
@@ -138,7 +138,7 @@ const CreateItemModal = props => {
       hasAutocomplete: true,
       label: 'Титул преподавателя (доцент\\профессор\\и т.д)',
       name: 'teacherTitle',
-      value: ''
+      value: '',
     },
 
     // Week sign (plus/minus)
@@ -147,72 +147,92 @@ const CreateItemModal = props => {
       name: 'weekSign',
       isObject: true,
       value: Object.keys(WEEKSIGN)[0],
-      values: WEEKSIGN
-    }
+      values: WEEKSIGN,
+    },
+
+    {
+      label: 'Игнорировать удаленную базу',
+      name: 'ignoreExternalDb',
+      isBoolean: true,
+      value: false,
+    },
+
+    {
+      label: 'Игнорировать последнюю запись из удаленной базы',
+      name: 'ignoreLastExternalDbRecord',
+      isBoolean: true,
+      value: false,
+    },
   ])
 
-  const handleSubmit = event => {
+  const handleSubmit = (event) => {
     event.preventDefault()
 
     const normalizedPayload = data.reduce(
-      (acc, _d) => ({
-        ...acc,
-        [_d.name]: _d.value
+      (result, current) => ({
+        ...result,
+        [current.name]: current.value,
       }),
       {}
     )
 
-    props.onCreate({
-      ...normalizedPayload,
-      shortSubjectName: normalizedPayload.fullSubjectName,
-      crossPair: !!parseInt(normalizedPayload.crossPair),
-      course: parseInt(normalizedPayload.course) + 1,
-      // ignoreExternalDb: true,
-      // ignoreLastExternalDbRecord: true
-    })
+    props
+      .onCreate({
+        ...normalizedPayload,
+        shortSubjectName: normalizedPayload.fullSubjectName,
+        crossPair: !!parseInt(normalizedPayload.crossPair),
+        course: parseInt(normalizedPayload.course) + 1,
+      })
+      .then(() => {
+        toast.success('Успешно добавлено!')
+      })
   }
 
-  const onInputChange = (index, input, event) => {
-    const nextData = [...data]
+  const onInputChange = useCallback(
+    (index, input, event) => {
+      const nextData = [...data]
 
-    const { value } = event.target
+      const { value } = event.target
 
-    if (input.name === 'columnPosition') {
-      const pairRange = PAIRS[value].split('-')
+      if (input.name === 'columnPosition') {
+        const pairRange = PAIRS[value].split('-')
+        if (!pairRange.length) {
+          throw new Error("There's no selected pair in PAIR_RANGE constant")
+        }
 
-      if (!pairRange.length) {
-        throw new Error("There's no selected pair in PAIR_RANGE constant")
+        const [start, end] = pairRange
+        const findStartIndex = data.findIndex((d) => d.name === 'start')
+
+        if (findStartIndex === -1) {
+          throw new Error("There's no such item: start")
+        }
+
+        const findEndIndex = data.findIndex((d) => d.name === 'end')
+        if (findEndIndex === -1) {
+          throw new Error("There's no such item: end")
+        }
+
+        nextData[findStartIndex] = { ...nextData[findStartIndex], value: start }
+        nextData[findEndIndex] = { ...nextData[findEndIndex], value: end }
       }
 
-      const start = pairRange[0]
-      const end = pairRange[1]
-
-      const findStartIndex = data.findIndex(d => d.name === 'start')
-
-      if (findStartIndex === -1) {
-        throw new Error("There's no such item: start")
+      if (input.isBoolean) {
+        nextData[index] = { ...nextData[index], value: !nextData[index].value }
+      } else {
+        nextData[index] = { ...nextData[index], value }
       }
 
-      const findEndIndex = data.findIndex(d => d.name === 'end')
-
-      if (findEndIndex === -1) {
-        throw new Error("There's no such item: end")
-      }
-
-      nextData[findStartIndex] = { ...nextData[findStartIndex], value: start }
-      nextData[findEndIndex] = { ...nextData[findEndIndex], value: end }
-    }
-
-    nextData[index] = { ...nextData[index], value }
-    setData(nextData)
-  }
+      setData(nextData)
+    },
+    [data]
+  )
 
   const renderedInputs = React.useMemo(
     () =>
       data.map((input, index) => {
         if (input.hasAutocomplete) {
           return (
-            <div className="form-group col-6" key={index}>
+            <div className="form-group col-md-6 col-12" key={index}>
               <label>{input.label}</label>
 
               <TextInput
@@ -220,7 +240,7 @@ const CreateItemModal = props => {
                 className="form-control"
                 value={input.value}
                 name={input.name}
-                onChange={e => onInputChange(index, input, { target: { value: e } })}
+                onChange={(e) => onInputChange(index, input, { target: { value: e } })}
                 options={props.autoCompleteOptions[input.name]}
                 trigger=""
                 offsetY={20}
@@ -235,29 +255,48 @@ const CreateItemModal = props => {
 
         if (input.isDate) {
           return (
-            <div className="form-group col-6" key={index}>
+            <div className="form-group col-md-6 col-12" key={index}>
               <label>{input.label}</label>
               <input
                 type="time"
                 className="form-control"
                 value={input.value}
                 name={input.name}
-                onChange={e => onInputChange(index, input, e)}
+                onChange={(e) => onInputChange(index, input, e)}
                 required
               />
             </div>
           )
         }
 
+        if (input.isBoolean) {
+          return (
+            <div className="form-group col-12 mb-1" key={index}>
+              <input
+                type="checkbox"
+                value={input.value}
+                name={input.name}
+                onChange={(e) => onInputChange(index, input, e)}
+                id={input.name}
+                required
+              />
+
+              <label className="ml-2" htmlFor={input.name}>
+                {input.label}
+              </label>
+            </div>
+          )
+        }
+
         if (input.hasOwnProperty('values')) {
           return (
-            <div className="form-group col-6" key={index}>
+            <div className="form-group col-md-6 col-12" key={index}>
               <label>{input.label}</label>
               <select
                 value={input.value}
                 name={input.name}
                 className="form-control"
-                onChange={e => onInputChange(index, input, e)}
+                onChange={(e) => onInputChange(index, input, e)}
                 required
               >
                 {input.isArray
@@ -277,21 +316,21 @@ const CreateItemModal = props => {
         }
 
         return (
-          <div className="form-group col-6" key={index}>
+          <div className="form-group col-md-6 col-12" key={index}>
             <label>{input.label}</label>
             <input
               type="text"
               className="form-control"
               value={input.value}
               name={input.name}
-              onChange={e => onInputChange(index, input, e)}
+              onChange={(e) => onInputChange(index, input, e)}
               disabled={!!input.disabled}
               required
             />
           </div>
         )
       }),
-    [data, props.autoCompleteOptions]
+    [data, onInputChange, props.autoCompleteOptions]
   )
 
   return (

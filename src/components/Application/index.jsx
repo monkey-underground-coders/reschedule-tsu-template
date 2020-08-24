@@ -1,81 +1,98 @@
-import React from 'react'
+import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import CreatePairModal from '../CreatePairModal'
 import { baseUrl, generateHeaders } from '../../utils'
 import { DAY_OF_WEEK, WEEKSIGN } from '../../utils/constants'
 import { Pagination, PaginationItem, PaginationLink } from 'reactstrap'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 import './index.css'
 
-const App = props => {
+const App = (props) => {
   // Data loading flag
-  const [loading, setLoading] = React.useState(false)
+  const [loading, setLoading] = useState(false)
 
   // Page counter for pagination
-  const [currentPage, setCurrentPage] = React.useState(0)
+  const [currentPage, setCurrentPage] = useState(0)
 
   // Pair data container
-  const [data, setData] = React.useState({
+  const [data, setData] = useState({
     content: [],
     totalPages: 1,
-    number: 0
+    number: 0,
   })
 
   // Modal status flag
-  const [createItemModal, setCreateItemModal] = React.useState(false)
+  const [createItemModal, setCreateItemModal] = useState(false)
 
   // Toggle modal function
-  const toggleCreateItemModal = () => setCreateItemModal(!createItemModal)
+  const toggleCreateItemModal = useCallback(() => setCreateItemModal(!createItemModal), [
+    createItemModal,
+    setCreateItemModal,
+  ])
 
-  const onCreate = payload => {
-    fetch(`${baseUrl}/cells/add`, {
-      method: 'POST',
-      headers: generateHeaders(props.token, true),
-      body: JSON.stringify(payload)
-    })
-      .then(res => {
-        if (res.ok) {
-          return res.json()
+  const onCreate = useCallback(
+    (payload) => {
+      return fetch(`${baseUrl}/cells/add`, {
+        method: 'POST',
+        headers: generateHeaders(props.token, true),
+        body: JSON.stringify(payload),
+      })
+        .then((res) => {
+          if (res.ok) {
+            return res.json()
+          }
+          throw new Error('An error occured while sending POST request')
+        })
+        .then((json) => {
+          setData({ ...data, content: [...data.content, json] })
+        })
+    },
+    [data, props.token]
+  )
+
+  const onDelete = useCallback(
+    (externalId) => () => {
+      fetch(`${baseUrl}/cells/c/${externalId}`, { method: 'DELETE', headers: generateHeaders(props.token) }).then(
+        (res) => {
+          if (!res.ok) {
+            throw new Error(`An error ocurred while deleting ${externalId}`)
+          }
+
+          setData({ ...data, content: data.content.filter((c) => c.externalId !== externalId) })
         }
-        throw new Error('An error occured while sending POST request')
-      })
-      .then(json => {
-        setData({ ...data, content: [...data.content, json] })
-      })
-  }
+      )
+    },
+    [data, props.token]
+  )
 
-  const onDelete = externalId => () => {
-    fetch(`${baseUrl}/cells/c/${externalId}`, { method: 'DELETE', headers: generateHeaders(props.token) }).then(res => {
-      if (res.ok) {
-        setData({ ...data, content: data.content.filter(c => c.externalId !== externalId) })
-      }
-    })
-  }
-
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.clear()
     window.location.reload()
-  }
+  }, [])
 
-  React.useEffect(() => {
+  useEffect(() => {
     setLoading(true)
     fetch(`${baseUrl}/cells/u/${props.username}/cells?size=150&page=${currentPage}`, {
-      headers: generateHeaders(props.token, true)
+      headers: generateHeaders(props.token, true),
     })
-      .then(res => {
-        setLoading(false)
+      .then((res) => {
         if (res.ok) {
           return res.json()
         }
         throw new Error('An error occured while sending GET request')
       })
-      .then(json => {
+      .then((json) => {
         setData({
           content: json.content,
-          totalPages: json.totalPages
+          totalPages: json.totalPages,
         })
       })
-  }, [currentPage])
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [currentPage, props.token, props.username])
 
-  const autoCompleteOptions = React.useMemo(() => {
+  const autoCompleteOptions = useMemo(() => {
     const reducedData = data.content.reduce(
       (acc, pair) => {
         acc.fullSubjectName.add(pair.fullSubjectName)
@@ -90,15 +107,18 @@ const App = props => {
         group: new Set(),
         teacherName: new Set(),
         teacherTitle: new Set(),
-        auditoryAddress: new Set()
+        auditoryAddress: new Set(),
       }
     )
-    return Object.keys(reducedData).reduce((data, key) => ({ ...data, [key]: [...reducedData[key]] }), {})
+    return Object.keys(reducedData).reduce(
+      (result, current) => ({ ...result, [current]: [...reducedData[current]] }),
+      {}
+    )
   }, [data.content])
 
-  const renderedTableItems = React.useMemo(
+  const renderedTableItems = useMemo(
     () =>
-      data.content.map(item => (
+      data.content.map((item) => (
         <tr key={item.externalId}>
           <td>{DAY_OF_WEEK[item.dayOfWeek]}</td>
           <td>{item.columnPosition + 1}</td>
@@ -116,7 +136,7 @@ const App = props => {
           </td>
         </tr>
       )),
-    [data]
+    [data, onDelete]
   )
 
   return (
@@ -159,7 +179,7 @@ const App = props => {
                       disabled={currentPage === 0 || loading}
                     />
                   </PaginationItem>
-                  {[...new Array(data.totalPages).keys()].map(page => (
+                  {[...new Array(data.totalPages).keys()].map((page) => (
                     <PaginationItem key={page} active={page === currentPage}>
                       <PaginationLink onClick={() => setCurrentPage(page)} disabled={page === currentPage || loading}>
                         {page + 1}
@@ -192,6 +212,8 @@ const App = props => {
         onCreate={onCreate}
         autoCompleteOptions={autoCompleteOptions}
       />
+
+      <ToastContainer />
     </div>
   )
 }
