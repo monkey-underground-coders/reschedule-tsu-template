@@ -3,6 +3,8 @@ import CreatePairModal from '../CreatePairModal'
 import { baseUrl, generateHeaders } from '../../utils'
 import { DAY_OF_WEEK, WEEKSIGN } from '../../utils/constants'
 import { Pagination, PaginationItem, PaginationLink } from 'reactstrap'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 import './index.css'
 
 const App = (props) => {
@@ -30,7 +32,7 @@ const App = (props) => {
 
   const onCreate = useCallback(
     (payload) => {
-      fetch(`${baseUrl}/cells/add`, {
+      return fetch(`${baseUrl}/cells/add`, {
         method: 'POST',
         headers: generateHeaders(props.token, true),
         body: JSON.stringify(payload),
@@ -210,6 +212,8 @@ const App = (props) => {
         onCreate={onCreate}
         autoCompleteOptions={autoCompleteOptions}
       />
+
+      <ToastContainer />
     </div>
   )
 }

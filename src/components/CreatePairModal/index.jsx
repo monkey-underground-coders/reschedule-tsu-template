@@ -3,6 +3,7 @@ import TextInput from 'react-autocomplete-input'
 import 'react-autocomplete-input/dist/bundle.css'
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap'
 import { DAY_OF_WEEK, WEEKSIGN, PAIRS, LEVELS, FACULTIES } from '../../utils/constants'
+import { toast } from 'react-toastify'
 
 const initialPairRange = (() => {
   const pairsRange = PAIRS[0].split('-')
@@ -175,12 +176,16 @@ const CreateItemModal = (props) => {
       {}
     )
 
-    props.onCreate({
-      ...normalizedPayload,
-      shortSubjectName: normalizedPayload.fullSubjectName,
-      crossPair: !!parseInt(normalizedPayload.crossPair),
-      course: parseInt(normalizedPayload.course) + 1,
-    })
+    props
+      .onCreate({
+        ...normalizedPayload,
+        shortSubjectName: normalizedPayload.fullSubjectName,
+        crossPair: !!parseInt(normalizedPayload.crossPair),
+        course: parseInt(normalizedPayload.course) + 1,
+      })
+      .then(() => {
+        toast.success('Успешно добавлено!')
+      })
   }
 
   const onInputChange = useCallback(
@@ -276,7 +281,7 @@ const CreateItemModal = (props) => {
                 required
               />
 
-              <label className="ml-2" htmlFor={`#${input.name}`}>
+              <label className="ml-2" htmlFor={input.name}>
                 {input.label}
               </label>
             </div>
