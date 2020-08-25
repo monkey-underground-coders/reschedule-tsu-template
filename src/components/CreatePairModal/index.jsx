@@ -278,7 +278,6 @@ const CreateItemModal = (props) => {
                 name={input.name}
                 onChange={(e) => onInputChange(index, input, e)}
                 id={input.name}
-                required
               />
 
               <label className="ml-2" htmlFor={input.name}>
