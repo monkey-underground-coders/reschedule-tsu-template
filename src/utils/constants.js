@@ -5,13 +5,13 @@ export const DAY_OF_WEEK = {
   THURSDAY: 'Четверг',
   FRIDAY: 'Пятница',
   SATURDAY: 'Суббота',
-  SUNDAY: 'Воскресенье'
+  SUNDAY: 'Воскресенье',
 }
 
 export const WEEKSIGN = {
   ANY: 'Обе',
   PLUS: 'Плюс',
-  MINUS: 'Минус'
+  MINUS: 'Минус',
 }
 
 export const FACULTIES = {
@@ -34,7 +34,7 @@ export const FACULTIES = {
   'Филфак, ИД и ЛИТ': 'Филфак, ИД и ЛИТ',
   'Филфак, ФИЛ и ФиПЛ': 'Филфак, ФИЛ и ФиПЛ',
   'Филфак, РиСО и ЖУР': 'Филфак, РиСО и ЖУР',
-  Психфак: 'Психфак'
+  Психфак: 'Психфак',
 }
 
 export const PAIRS = [
@@ -42,12 +42,12 @@ export const PAIRS = [
   '10:15-11:50',
   '12:10-13:45',
   '14:00-15:35',
-  '15:50-17:25',
-  '17:40-19:15',
-  '19:25-21:00'
+  '15:55-17:30',
+  '17:45-19:20',
+  '19:30-21:05',
 ]
 
 export const LEVELS = {
   BACHELOR_SPECIALTY: 'Бакалавриат',
-  MAGISTRACY: 'Магистратура'
+  MAGISTRACY: 'Магистратура',
 }
